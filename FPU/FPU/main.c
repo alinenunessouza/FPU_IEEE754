@@ -40,6 +40,7 @@ int main() {
 	int mantissa_aux;//teste
 	int mantissa_aux2;//teste
 	int soma_mantissa;//teste
+
 	printf("Entre com um ponto flutuante 1: ");
 	scanf_s("%f", &var.f);//35.75
 	//var.f=20.50;//ao inves de ler do teclado o valor ta fixo
@@ -70,6 +71,7 @@ int main() {
 
 	mantissa_aux = var.field.mantissa + 0x800000;//passando para variavel auxiliar e somando 1.  (1.mantissa implicito que deve ser adicionado
 	mantissa_aux2 = var2.field.mantissa + 0x800000;//passando para variavel auxiliar e somando 1.
+
 	if (exp != exp2) {
 		if (exp > exp2) {  // iguala o expoente dos numeros para poder somar (so podemos somar as mantissas se tiverem expoentes iguais) nesse caso exp do numero 1 é maior que o do numero 2
 			desloca = exp - exp2;
