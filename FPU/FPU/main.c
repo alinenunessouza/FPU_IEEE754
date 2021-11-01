@@ -60,7 +60,7 @@ unionfloat add(unionfloat a, unionfloat b) {
 			binario(soma_mantissa, 23);
 			printf("\n\n numero reconstituido  : %f \n", pow(-1, (a.field.sinal)) * (soma_mantissa / pow(2, 23)) * pow(2, (a.field.exponente - 127)));
 
-			//TODO verificar se precisa normalizar o número
+			//TODO verificar se precisa normalizar o número: deslocar a vírgula e aumentar o expoente
 		}
 		if (exp < exp2) { // iguala o expoente dos numeros para poder somar (so podemos somar as mantissas se tiverem expoentes iguais) nesse caso exp do numero 2 é maior que o do numero 1
 			desloca = exp2 - exp;
