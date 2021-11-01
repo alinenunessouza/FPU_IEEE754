@@ -1,0 +1,2 @@
+R. Vincent and S. L. Anju, "Decimal floating point format based on commonly used precision for embedded system applications," 2013 Annual International Conference on Emerging Research Areas and 2013 International Conference on Microelectronics, Communications and Renewable Energy, 2013, pp. 1-4, doi: 10.1109/AICERA-ICMiCR.2013.6575957.
+https://ieeexplore.ieee.org/document/6575957
