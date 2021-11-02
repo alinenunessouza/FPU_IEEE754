@@ -1,0 +1,1 @@
+printf("\n\n numero reconstituido  : %f \n", pow(-1, (a.
