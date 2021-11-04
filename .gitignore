@@ -2,6 +2,8 @@
 *.db
 *.vs
 *Debug
+.vscode
+.DS_Store
 
 ### C ###
 # Prerequisites
