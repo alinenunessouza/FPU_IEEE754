@@ -37,7 +37,7 @@ float reconstruirNumero(unionfloat numero, int soma) {
 unionfloat normalizaNumero(int sinal, int exp, int mantissa) {
 	unionfloat n;
 	n.field.sinal = sinal;
-	int desloc_exp = 0;			      
+	int desloc_exp = 0;
 	for (desloc_exp = 0; (mantissa & 0x800000) != 0; desloc_exp++) {
 		mantissa = mantissa << 1;
 		printf("\n%d ", desloc_exp);
@@ -52,7 +52,7 @@ unionfloat normalizaNumero(int sinal, int exp, int mantissa) {
 	printf(" ");
 	binario(n.field.mantissa, 23);
 
-	return n;	
+	return n;
 }
 
 void ajustaNegativo(int * mantissa, int * exp) {
@@ -165,7 +165,7 @@ int main() {
 	printf("numero 2 reconstituido  : %f \n", pow(-1, (numero2.field.sinal)) * (1.0 + numero2.field.mantissa / pow(2, 23)) * pow(2, (numero2.field.exponente - 127)));
 	//printf("numero 2 reconstituido  : %f \n", reconstruirNumero(numero2));
 	printf("\n");
-	
+
 	numeroResultadoOperacao = add(numero1, numero2);
 
 

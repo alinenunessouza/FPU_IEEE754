@@ -1,0 +1,5 @@
+# depslib dependency file v1.0
+1636065889 source:c:\unisinos\fpu_ieee754\fpu\main.c
+	<stdio.h>
+	<math.h>
+
