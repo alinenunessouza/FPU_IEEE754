@@ -1,6 +1,7 @@
-//#include <iostream>
 #include<stdio.h>
 #include<math.h>
+#include<locale.h>
+#include<conio.h>
 
 /// <summary>
 /// Função para imprimir na tela os bits de um número
@@ -18,6 +19,7 @@ int binario(int n, int i)
 			printf("1");
 		else
 			printf("0");
+			
 	}
 }
 
@@ -30,16 +32,28 @@ typedef union {
 	} field;
 } unionfloat;
 
-float reconstruirNumero(unionfloat numero, int soma) {
-	return pow(-1, (numero.field.sinal)) * (1.0 + soma / pow(2, 23)) * pow(2, (numero.field.exponente - 127));
+float reconstruirNumero(unionfloat numero) {
+	return pow(-1, (numero.field.sinal)) * (1.0 + numero.field.mantissa / pow(2, 23)) * pow(2, (numero.field.exponente - 127));
 }
 
 unionfloat normalizaNumero(int sinal, int exp, int mantissa) {
 	unionfloat n;
 	n.field.sinal = sinal;
 	int desloc_exp = 0;
-	for (desloc_exp = 0; (mantissa & 0x800000) == 0; desloc_exp++) {
-		mantissa = mantissa << 1;
+	
+	if (mantissa & 0xFFFFFF != 0) {
+		for (desloc_exp; (mantissa & 0x800000) == 0; desloc_exp++) {
+			mantissa = mantissa << 1;
+		}
+	} else if (mantissa != 0) {
+		int mascara = 0x800000;
+		for (int i = 0; i < 5; i--) {
+			if ((mantissa & mascara) != 0) {
+				desloc_exp = i;
+			}
+			mascara = mascara << 1;
+		}	
+		mantissa = mantissa << desloc_exp;	
 	}
 	n.field.exponente = exp - desloc_exp + 127;
 	n.field.mantissa = mantissa;
@@ -67,7 +81,7 @@ unionfloat add(unionfloat a, unionfloat b) {
 	int soma_mantissa;
 
 	exp = a.field.exponente - 127;// recupera o expoente limpo  (valora armazenado na variavel expoente - bias(127))
-	exp2 = b.field.exponente - 127;//teste
+	exp2 = b.field.exponente - 127;
 
 	mantissa_aux = a.field.mantissa + 0x800000;//passando para variavel auxiliar e somando 1.  (1.mantissa implicito que deve ser adicionado
 	mantissa_aux2 = b.field.mantissa + 0x800000;//passando para variavel auxiliar e somando 1.
@@ -84,74 +98,68 @@ unionfloat add(unionfloat a, unionfloat b) {
 	if (exp != exp2) {
 		//se os expoentes forem diferentes, tem que pegar o menor e igualar ao maior
 		if (exp > exp2) {  // iguala o expoente dos numeros para poder somar (so podemos somar as mantissas se tiverem expoentes iguais) nesse caso exp do numero 1 é maior que o do numero 2
-			binario(soma_mantissa, 23);
 			desloca = exp - exp2; //quantas vezes tem que deslocar essa mantissa
-			mantissa_aux2 = mantissa_aux2 >> desloca; // então  deslocamos a virgual do numero menor (2)
-			soma_mantissa = mantissa_aux2 + mantissa_aux;
-			binario(soma_mantissa, 23);
-			printf("\n\n numero reconstituido  : %f \n", reconstruirNumero(a, soma_mantissa));
-
-			//TODO verificar se precisa normalizar o número: deslocar a vírgula e aumentar o expoente
+			exp2 = exp;
+			mantissa_aux2 = mantissa_aux2 >> desloca; // então deslocamos a vírgula do numero menor (2)
 		}
 		if (exp < exp2) { // iguala o expoente dos numeros para poder somar (so podemos somar as mantissas se tiverem expoentes iguais) nesse caso exp do numero 2 é maior que o do numero 1
-			desloca = exp2 - exp;
-			mantissa_aux = mantissa_aux >> desloca;  // então  deslocamos a virgual do numero menor (1)
-			soma_mantissa = mantissa_aux + mantissa_aux2; // realizamos a soma
-			binario(soma_mantissa, 23);
-			printf("\n\n numero reconstituido  : %f \n", reconstruirNumero(b, soma_mantissa));
+			desloca = exp2 - exp; //quantas vezes tem que deslocar essa mantissa
+			exp = exp2;
+			mantissa_aux = mantissa_aux >> desloca;  // então deslocamos a vírgula do numero menor (1)
 		}
-	} else {
-		soma_mantissa = mantissa_aux + mantissa_aux2;
-		
-		int sinal = 0;
-		// Só faz o complemento se o número for negativo
-		if (soma_mantissa < 0) {
-			soma_mantissa = ~soma_mantissa;
-			sinal = 1;
-		}
-		
-		unionfloat n = normalizaNumero(sinal, exp, soma_mantissa);
+	} 
 
-		printf("\n\n numero reconstituido  : %f \n", reconstruirNumero(n, n.field.mantissa));
+	soma_mantissa = mantissa_aux + mantissa_aux2;
+
+	int sinal = 0;
+	// Só faz o complemento se o número for negativo
+	if (soma_mantissa < 0) {
+		soma_mantissa = ~soma_mantissa;
+		sinal = 1;
 	}
+	
+	return normalizaNumero(sinal, exp, soma_mantissa);
+}
+
+void exibeNumero(unionfloat n, char * descricao) {
+	printf("\n");
+	printf("%d ", n.field.sinal);
+	binario(n.field.exponente, 8);
+	printf(" ");
+	binario(n.field.mantissa, 23);
+	printf("\n");
+	printf("%s reconstituído  : %f \n", descricao, reconstruirNumero(n));
+	printf("\n");
 }
 
 int main() {
+    setlocale(LC_ALL, "Portuguese");
 
 	unionfloat numero1;
 	unionfloat numero2;
+	char op;
 
 	unionfloat numeroResultadoOperacao;
 
 	printf("Entre com um ponto flutuante 1: ");
-	//scanf("%f", &numero1.f);//35.75
-	//var.f=20.50;//ao inves de ler do teclado o valor ta fixo
-	numero2.f = -4.78;
+	//scanf("%f", &numero1.f);
+	numero2.f = 1;
 	printf("Entre com um ponto flutuante 2: ");
-	//scanf("%f", &numero2.f);//20.50
-	//var2.f=35.75;//ao inves de ler do teclado o valor ta fixo
-	numero1.f = 5.23;
+	//scanf("%f", &numero2.f);
+	numero1.f = 1;
+	printf("Informe a operação (+/-): ");
+	//op = getch();
+	
+	if (op == '-') {
+		numero2.f = - numero2.f;
+	}
 	printf("\n\n");
-	printf("%d ", numero1.field.sinal);
-	binario(numero1.field.exponente, 8);
-	printf(" ");
-	binario(numero1.field.mantissa, 23);
-	printf("\n");
-	printf("numero 1 reconstituido  : %f \n", pow(-1, (numero1.field.sinal)) * (1.0 + numero1.field.mantissa / pow(2, 23)) * pow(2, (numero1.field.exponente - 127)));
-	//printf("numero 1 reconstituido  : %f \n", reconstruirNumero(numero1));
-
-	printf("\n");
-	printf("%d ", numero2.field.sinal);
-	binario(numero2.field.exponente, 8);
-	printf(" ");
-	binario(numero2.field.mantissa, 23);
-	printf("\n");
-	printf("numero 2 reconstituido  : %f \n", pow(-1, (numero2.field.sinal)) * (1.0 + numero2.field.mantissa / pow(2, 23)) * pow(2, (numero2.field.exponente - 127)));
-	//printf("numero 2 reconstituido  : %f \n", reconstruirNumero(numero2));
-	printf("\n");
+	
+	exibeNumero(numero1, "Numero 1");
+	exibeNumero(numero2, "Numero 2");
 
 	numeroResultadoOperacao = add(numero1, numero2);
-
-
+	
+	exibeNumero(numeroResultadoOperacao, "Resultado");
 	return 0;
 }
