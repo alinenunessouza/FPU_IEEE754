@@ -31,41 +31,24 @@ typedef union {
 } unionfloat;
 
 float reconstruirNumero(unionfloat numero, int soma) {
-	return pow(-1, (numero.field.sinal)) * (soma / pow(2, 23)) * pow(2, (numero.field.exponente - 127));
+	return pow(-1, (numero.field.sinal)) * (1.0 + soma / pow(2, 23)) * pow(2, (numero.field.exponente - 127));
 }
 
 unionfloat normalizaNumero(int sinal, int exp, int mantissa) {
 	unionfloat n;
 	n.field.sinal = sinal;
 	int desloc_exp = 0;
-	for (desloc_exp = 0; (mantissa & 0x800000) != 0; desloc_exp++) {
+	for (desloc_exp = 0; (mantissa & 0x800000) == 0; desloc_exp++) {
 		mantissa = mantissa << 1;
-		printf("\n%d ", desloc_exp);
-		binario(mantissa, 30);
 	}
-	n.field.exponente = - desloc_exp + 127;
-	n.field.mantissa = mantissa << 1; //Desloca mais uma vez para abstrair primeiro 1
-
-	printf("\n\n");
-	printf("%d ", n.field.sinal);
-	binario(n.field.exponente, 8);
-	printf(" ");
-	binario(n.field.mantissa, 23);
+	n.field.exponente = exp - desloc_exp + 127;
+	n.field.mantissa = mantissa;
 
 	return n;
 }
 
 void ajustaNegativo(int * mantissa, int * exp) {
-	// Faz o complemento de 2 da mantissa e deixar últimos 24 bits
-	*mantissa = (~(*mantissa) + 1) & 0xFFFFFF;
-	// binario(*mantissa, 24);
-	// printf("\n");
-	// // Se número complementado ficou maior que 23 bits
-	// if (*mantissa & 0xF00000) {
-	// 	// Desloca uma casa para direita e aumenta expoente (para manter em 23 bits)
-	// 	*mantissa = (*mantissa) >> 1;
-	// 	*exp = *exp + 1;
-	// }
+	*mantissa = ~(*mantissa) + 1;
 }
 
 /// <summary>
@@ -117,18 +100,19 @@ unionfloat add(unionfloat a, unionfloat b) {
 			binario(soma_mantissa, 23);
 			printf("\n\n numero reconstituido  : %f \n", reconstruirNumero(b, soma_mantissa));
 		}
-	}
-	else {
-		printf("\n\nMantissas somadas:\n");
-		printf("\n1:");
-		binario(mantissa_aux, 30);
-		printf("\n2:");
-		binario(mantissa_aux2, 30);
-		printf("\nsoma:");
+	} else {
 		soma_mantissa = mantissa_aux + mantissa_aux2;
-		binario(soma_mantissa, 30);
-		//printf("\n\n numero reconstituido  : %f \n", reconstruirNumero(b, soma_mantissa));
-		printf("\n\n numero reconstituido  : %f \n", reconstruirNumero(normalizaNumero(a.field.sinal, exp, soma_mantissa), soma_mantissa));
+		
+		int sinal = 0;
+		// Só faz o complemento se o número for negativo
+		if (soma_mantissa < 0) {
+			soma_mantissa = ~soma_mantissa;
+			sinal = 1;
+		}
+		
+		unionfloat n = normalizaNumero(sinal, exp, soma_mantissa);
+
+		printf("\n\n numero reconstituido  : %f \n", reconstruirNumero(n, n.field.mantissa));
 	}
 }
 
@@ -142,11 +126,11 @@ int main() {
 	printf("Entre com um ponto flutuante 1: ");
 	//scanf("%f", &numero1.f);//35.75
 	//var.f=20.50;//ao inves de ler do teclado o valor ta fixo
-	numero1.f = 4.78;
+	numero2.f = -4.78;
 	printf("Entre com um ponto flutuante 2: ");
 	//scanf("%f", &numero2.f);//20.50
 	//var2.f=35.75;//ao inves de ler do teclado o valor ta fixo
-	numero2.f = -5.23;
+	numero1.f = 5.23;
 	printf("\n\n");
 	printf("%d ", numero1.field.sinal);
 	binario(numero1.field.exponente, 8);
