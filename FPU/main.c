@@ -9,7 +9,7 @@
 /// <param name="n">valor decimal qualquer</param>
 /// <param name="i">numero de bits que será implementado o número</param>
 /// <returns></returns>
-int binario(int n, int i)
+void binario(int n, int i)
 {
 	int k;
 	for (i--; i >= 0; i--)
@@ -21,6 +21,11 @@ int binario(int n, int i)
 			printf("0");
 			
 	}
+}
+
+void binario_s(int n, int i, char *s) {
+	printf("\n%s\t", s);
+	binario(n, i);
 }
 
 typedef union {
@@ -41,21 +46,28 @@ unionfloat normalizaNumero(int sinal, int exp, int mantissa) {
 	n.field.sinal = sinal;
 	int desloc_exp = 0;
 	
-	if (mantissa & 0xFFFFFF != 0) {
-		for (desloc_exp; (mantissa & 0x800000) == 0; desloc_exp++) {
-			mantissa = mantissa << 1;
-		}
-	} else if (mantissa != 0) {
-		int mascara = 0x800000;
-		for (int i = 0; i < 5; i--) {
+	// Se não for zero (não faz sentido procurar)
+	if (mantissa != 0) {
+		// Procura pelo primeiro 1 da mantissa, da esquerda (MSB) para direita (LSB)
+		int mascara = 0x80000000;
+		for (int i = 31; i >= 0; i--) {
 			if ((mantissa & mascara) != 0) {
 				desloc_exp = i;
+				break;
 			}
-			mascara = mascara << 1;
-		}	
-		mantissa = mantissa << desloc_exp;	
+			mascara = mascara >> 1;
+		}
+		// Calcula deslocamento em relação à posição padrão (23)
+		desloc_exp = desloc_exp - 23;
+		if (desloc_exp < 0)
+			mantissa = mantissa << abs(desloc_exp);
+		else 
+			mantissa = mantissa >> desloc_exp;
+		n.field.exponente = exp + desloc_exp + 127;
+	} else {
+		n.field.exponente = 0;
 	}
-	n.field.exponente = exp - desloc_exp + 127;
+
 	n.field.mantissa = mantissa;
 
 	return n;
@@ -128,7 +140,7 @@ void exibeNumero(unionfloat n, char * descricao) {
 	printf(" ");
 	binario(n.field.mantissa, 23);
 	printf("\n");
-	printf("%s reconstituído  : %f \n", descricao, reconstruirNumero(n));
+	printf("%s reconstituído:  \t%f\n", descricao, reconstruirNumero(n));
 	printf("\n");
 }
 
@@ -141,14 +153,13 @@ int main() {
 
 	unionfloat numeroResultadoOperacao;
 
-	printf("Entre com um ponto flutuante 1: ");
-	//scanf("%f", &numero1.f);
-	numero2.f = 1;
-	printf("Entre com um ponto flutuante 2: ");
-	//scanf("%f", &numero2.f);
-	numero1.f = 1;
+	printf("Entre com um ponto flutuante 1 (com vírgula): ");
+	scanf("%f", &numero1.f);
+	printf("Entre com um ponto flutuante 2 (com vírgula): ");
+	scanf("%f", &numero2.f);
 	printf("Informe a operação (+/-): ");
-	//op = getch();
+	op = getch();
+	printf("%c", op);
 	
 	if (op == '-') {
 		numero2.f = - numero2.f;
@@ -160,6 +171,6 @@ int main() {
 
 	numeroResultadoOperacao = add(numero1, numero2);
 	
-	exibeNumero(numeroResultadoOperacao, "Resultado");
+	exibeNumero(numeroResultadoOperacao, "Resultado (simulado)");
 	return 0;
 }
