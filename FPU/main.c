@@ -4,10 +4,10 @@
 #include<conio.h>
 
 /// <summary>
-/// FunÁ„o para imprimir na tela os bits de um n˙mero
+/// Fun√ß√£o para imprimir na tela os bits de um n√∫mero
 /// </summary>
 /// <param name="n">valor decimal qualquer</param>
-/// <param name="i">numero de bits que ser· implementado o n˙mero</param>
+/// <param name="i">numero de bits que ser√° implementado o n√∫mero</param>
 /// <returns></returns>
 int binario(int n, int i)
 {
@@ -15,7 +15,7 @@ int binario(int n, int i)
 	for (i--; i >= 0; i--)
 	{
 		k = n >> i; //valor de n deslocado em i
-		if (k & 1) //1 È uma m·scara, n˙mero 1 em bin·rio 00000001
+		if (k & 1) //1 √© uma m√°scara, n√∫mero 1 em bin√°rio 00000001
 			printf("1");
 		else
 			printf("0");
@@ -24,7 +24,7 @@ int binario(int n, int i)
 }
 
 typedef union {
-	float f; //f e a struct field ocupam a mesma posiÁ„o da memÛria
+	float f; //f e a struct field ocupam a mesma posi√ß√£o da mem√≥ria
 	struct {
 		unsigned int mantissa : 23;
 		unsigned int exponente : 8;
@@ -32,10 +32,19 @@ typedef union {
 	} field;
 } unionfloat;
 
+/// <summary>
+/// Converte o n√∫mero no padr√£o iee754 para o n√∫mero com ponto flutuante normal
+/// </summary>
+/// <param name="numero">n√∫mero no padr√£o iee754</param>
+/// <returns></returns>
 float reconstruirNumero(unionfloat numero) {
 	return pow(-1, (numero.field.sinal)) * (1.0 + numero.field.mantissa / pow(2, 23)) * pow(2, (numero.field.exponente - 127));
 }
 
+/// <summary>
+/// Normalizar o n√∫mero a partir do sinal, expoente e mantissa, colocando o primeiro bit como 1
+/// </summary>
+/// <returns></returns>
 unionfloat normalizaNumero(int sinal, int exp, int mantissa) {
 	unionfloat n;
 	n.field.sinal = sinal;
@@ -61,12 +70,16 @@ unionfloat normalizaNumero(int sinal, int exp, int mantissa) {
 	return n;
 }
 
+/// <summary>
+/// Realiza o complemento
+/// </summary>
+/// <returns></returns>
 void ajustaNegativo(int * mantissa, int * exp) {
 	*mantissa = ~(*mantissa) + 1;
 }
 
 /// <summary>
-/// OperaÁ„o de soma de dois n˙meros com ponto flutuante
+/// Opera√ß√£o de soma de dois n√∫meros com ponto flutuante
 /// </summary>
 /// <param name="a"></param>
 /// <param name="b"></param>
@@ -86,33 +99,33 @@ unionfloat add(unionfloat a, unionfloat b) {
 	mantissa_aux = a.field.mantissa + 0x800000;//passando para variavel auxiliar e somando 1.  (1.mantissa implicito que deve ser adicionado
 	mantissa_aux2 = b.field.mantissa + 0x800000;//passando para variavel auxiliar e somando 1.
 
-	// Se for um n˙mero negativo
+	// Se for um n√∫mero negativo
 	if (a.field.sinal == 1) {
 		ajustaNegativo(&mantissa_aux, &exp);
 	}
-	// Se for um n˙mero negativo
+	// Se for um n√∫mero negativo
 	if (b.field.sinal == 1) {
 		ajustaNegativo(&mantissa_aux2, &exp2);
 	}
 
 	if (exp != exp2) {
 		//se os expoentes forem diferentes, tem que pegar o menor e igualar ao maior
-		if (exp > exp2) {  // iguala o expoente dos numeros para poder somar (so podemos somar as mantissas se tiverem expoentes iguais) nesse caso exp do numero 1 È maior que o do numero 2
+		if (exp > exp2) {  // iguala o expoente dos numeros para poder somar (so podemos somar as mantissas se tiverem expoentes iguais) nesse caso exp do numero 1 √© maior que o do numero 2
 			desloca = exp - exp2; //quantas vezes tem que deslocar essa mantissa
 			exp2 = exp;
-			mantissa_aux2 = mantissa_aux2 >> desloca; // ent„o deslocamos a vÌrgula do numero menor (2)
+			mantissa_aux2 = mantissa_aux2 >> desloca; // ent√£o deslocamos a v√≠rgula do numero menor (2)
 		}
-		if (exp < exp2) { // iguala o expoente dos numeros para poder somar (so podemos somar as mantissas se tiverem expoentes iguais) nesse caso exp do numero 2 È maior que o do numero 1
+		if (exp < exp2) { // iguala o expoente dos numeros para poder somar (so podemos somar as mantissas se tiverem expoentes iguais) nesse caso exp do numero 2 √© maior que o do numero 1
 			desloca = exp2 - exp; //quantas vezes tem que deslocar essa mantissa
 			exp = exp2;
-			mantissa_aux = mantissa_aux >> desloca;  // ent„o deslocamos a vÌrgula do numero menor (1)
+			mantissa_aux = mantissa_aux >> desloca;  // ent√£o deslocamos a v√≠rgula do numero menor (1)
 		}
 	} 
 
 	soma_mantissa = mantissa_aux + mantissa_aux2;
 
 	int sinal = 0;
-	// SÛ faz o complemento se o n˙mero for negativo
+	// S√≥ faz o complemento se o n√∫mero for negativo
 	if (soma_mantissa < 0) {
 		soma_mantissa = ~soma_mantissa;
 		sinal = 1;
@@ -128,7 +141,7 @@ void exibeNumero(unionfloat n, char * descricao) {
 	printf(" ");
 	binario(n.field.mantissa, 23);
 	printf("\n");
-	printf("%s reconstituÌdo  : %f \n", descricao, reconstruirNumero(n));
+	printf("%s reconstitu√≠do  : %f \n", descricao, reconstruirNumero(n));
 	printf("\n");
 }
 
@@ -147,7 +160,7 @@ int main() {
 	printf("Entre com um ponto flutuante 2: ");
 	//scanf("%f", &numero2.f);
 	numero1.f = 1;
-	printf("Informe a operaÁ„o (+/-): ");
+	printf("Informe a opera√ß√£o (+/-): ");
 	//op = getch();
 	
 	if (op == '-') {
