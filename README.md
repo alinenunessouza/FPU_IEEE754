@@ -16,8 +16,14 @@
 - sinalização de underflow: quando não tem precisão suficiente para mostrar o número (caso do número ser muito pequeno)
 
 #### Operações
-- Soma:
-- Subtração:
+- Soma: TODO explicação
+- Subtração: TODO explicação
+
+#### Implementacão da FPU no Logisim
+- Na entrada do circuito, foi colocada uma entrada de 1 bit para o seletor, que indica qual operação será realizada (soma ou subtração)
+- Na entrada e saída do circuito, há registradores que para armazenar as entradas e o resultado da operação
+- Registradores de entrada ativos na borda de subida do clock
+- Registradores de saída ativos na borda de descida do clock
 
 ##### Código das operações
 - 00 -> soma
